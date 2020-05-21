@@ -8,7 +8,7 @@
 
             if (controllerName.EndsWith(controller))
             {
-                return controllerName.Remove(controllerName.Length - controller.Length - 1);
+                return controllerName.Remove(controllerName.Length - controller.Length);
             }
 
             return controllerName;

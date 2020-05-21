@@ -45,7 +45,7 @@ namespace IdentityNetCore.Controllers
                         user = await _userManager.FindByEmailAsync(model.Email);
                         var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                         var confirmationLink = Url.ActionLink(nameof(ConfirmEmail),
-                            nameof(IdentityConstants).CutOffController(), new {userId = user.Id, token = token});
+                            nameof(IdentityController).CutOffController(), new {userId = user.Id, @token = token});
                         await _emailSender.SendEmailAsync(model.Email, "Please confirm your email address",
                             $"Please click to the link: {confirmationLink}");
                         return RedirectToAction(nameof(SignIn));
@@ -62,7 +62,30 @@ namespace IdentityNetCore.Controllers
 
         public async Task<IActionResult> ConfirmEmail(string userId, string token)
         {
-            return new OkResult();
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user != null && !user.EmailConfirmed)
+            {
+                var result = await _userManager.ConfirmEmailAsync(user, token);
+                if (result.Succeeded)
+                {
+                    RedirectToAction(nameof(SignIn));
+                }
+
+                return BadRequest(result.Errors.Select(e => e.Description).Join(". "));
+            }
+
+            if (user == null)
+            {
+                return new NotFoundResult();
+            }
+
+            if (user.EmailConfirmed)
+            {
+                RedirectToAction(nameof(SignIn));
+            }
+
+            return new BadRequestResult();
         }
 
         public async Task<IActionResult> SignIn()
