@@ -58,6 +58,8 @@ namespace IdentityNetCore
                 option.LoginPath = $"/{nameof(IdentityController).CutOffController()}/{nameof(IdentityController.SignIn)}";
                 option.AccessDeniedPath =
                     $"/{nameof(IdentityController).CutOffController()}/{nameof(IdentityController.AccessDenied)}";
+                option.ExpireTimeSpan = TimeSpan.FromHours(1);
+                option.SlidingExpiration = true;
             });
 
             services.Configure<SmtpOptions>(Configuration.GetSection("Smtp"));
