@@ -1,0 +1,10 @@
+﻿@using IdentityNetCore.Controllers
+@using IdentityNetCore.Helpers
+@model object
+
+@{
+    Layout = null;
+}
+
+<h1>Access denied!</h1>
+@Html.ActionLink("Back to home", nameof(HomeController.Index), nameof(HomeController).CutOffController())

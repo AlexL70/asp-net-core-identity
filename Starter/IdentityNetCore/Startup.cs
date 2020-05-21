@@ -41,16 +41,16 @@ namespace IdentityNetCore
 
             services.Configure<IdentityOptions>(options =>
             {
-                options.Password.RequiredLength = 6;
-                options.Password.RequireDigit = true;
+                options.Password.RequiredLength = 3;
+                options.Password.RequireDigit = false;
                 options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequireLowercase = true;
-                options.Password.RequireUppercase = true;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireUppercase = false;
 
                 options.Lockout.MaxFailedAccessAttempts = 5;
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
 
-                options.SignIn.RequireConfirmedEmail = true;
+                //options.SignIn.RequireConfirmedEmail = true;
             });
 
             services.ConfigureApplicationCookie(option =>

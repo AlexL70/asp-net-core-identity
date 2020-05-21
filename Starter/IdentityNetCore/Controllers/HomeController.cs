@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using IdentityNetCore.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace IdentityNetCore.Controllers
 {
@@ -23,11 +20,13 @@ namespace IdentityNetCore.Controllers
             return View();
         }
 
+        [Authorize(Roles = "Member")]
         public IActionResult Member()
         {
             return View();
         }
 
+        [Authorize(Roles = "Admin")]
         public IActionResult Admin()
         {
             return View();

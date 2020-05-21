@@ -13,20 +13,23 @@ namespace IdentityNetCore.Controllers
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IEmailSender _emailSender;
 
         public IdentityController(UserManager<IdentityUser> userManager, 
             SignInManager<IdentityUser> signInManager,
+            RoleManager<IdentityRole> roleManager,
             IEmailSender emailSender)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _roleManager = roleManager;
             _emailSender = emailSender;
         }
 
         public async Task<IActionResult> SignUp()
         {
-            var model = new SignUpViewModel();
+            var model = new SignUpViewModel() { Role = "Member" };
             return View(model);
         }
 
@@ -35,6 +38,18 @@ namespace IdentityNetCore.Controllers
         {
             if (ModelState.IsValid)
             {
+                //  Role creating code is just for learning purposes
+                //  Never do it in a real life
+                if (!await _roleManager.RoleExistsAsync(model.Role))
+                {
+                    var result = await _roleManager.CreateAsync(new IdentityRole {Name = model.Role});
+                    if (!result.Succeeded)
+                    {
+                        ModelState.AddModelError("Role", $"Role {model.Role} cannot be created");
+                        return View(model);
+                    }
+                }
+
                 if (await _userManager.FindByEmailAsync(model.Email) == null)
                 {
                     var user = new IdentityUser
@@ -46,12 +61,21 @@ namespace IdentityNetCore.Controllers
 
                     if (result.Succeeded)
                     {
-                        user = await _userManager.FindByEmailAsync(model.Email);
-                        var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                        var confirmationLink = Url.ActionLink(nameof(ConfirmEmail),
-                            nameof(IdentityController).CutOffController(), new {userId = user.Id, @token = token});
-                        await _emailSender.SendEmailAsync(model.Email, "Please confirm your email address",
-                            $"Please click to the link: {confirmationLink}");
+                        //user = await _userManager.FindByEmailAsync(model.Email);
+                        //var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                        //var confirmationLink = Url.ActionLink(nameof(ConfirmEmail),
+                        //    nameof(IdentityController).CutOffController(), new {userId = user.Id, @token = token});
+                        //await _emailSender.SendEmailAsync(model.Email, "Please confirm your email address",
+                        //    $"Please click to the link: {confirmationLink}");
+
+
+                        var addToRoleResult = await _userManager.AddToRoleAsync(user, model.Role);
+                        if (!addToRoleResult.Succeeded)
+                        {
+                            ModelState.AddModelError($"Role", $"Cannot assign role {model.Role} to user {model.Email}");
+                            return View(model);
+                        }
+
                         return RedirectToAction(nameof(SignIn));
                     }
 
@@ -110,6 +134,17 @@ namespace IdentityNetCore.Controllers
             {
                 ModelState.AddModelError("Login", "Sign in is not successful.");
                 return View(model);
+            }
+
+            var user = await _userManager.FindByEmailAsync(model.Username);
+            if (await _userManager.IsInRoleAsync(user, "Admin"))
+            {
+                return RedirectToAction(nameof(HomeController.Admin), nameof(HomeController).CutOffController());
+            }
+
+            if (await _userManager.IsInRoleAsync(user, "Member"))
+            {
+                return RedirectToAction(nameof(HomeController.Member), nameof(HomeController).CutOffController());
             }
 
             return RedirectToAction(nameof(HomeController.Index), nameof(HomeController).CutOffController());
