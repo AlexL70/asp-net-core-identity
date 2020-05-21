@@ -1,5 +1,8 @@
 using System;
+using IdentityNetCore.Controllers;
 using IdentityNetCore.Data;
+using IdentityNetCore.Helpers;
+using IdentityNetCore.Service;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -12,9 +15,16 @@ namespace IdentityNetCore
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(
+            //  IConfiguration configuration,
+            IWebHostEnvironment env)
         {
-            Configuration = configuration;
+            Configuration = new ConfigurationBuilder()
+                .SetBasePath(env.ContentRootPath)
+                .AddJsonFile("appsettings.json", true, true)
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", true)
+                .AddEnvironmentVariables()
+                .Build();
         }
 
         public IConfiguration Configuration { get; }
@@ -26,7 +36,9 @@ namespace IdentityNetCore
             services.AddDbContext<ApplicationDbContext>(_ => _.UseSqlServer(connectionString));
 
             services.AddIdentity<IdentityUser, IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders();
+
             services.Configure<IdentityOptions>(options =>
             {
                 options.Password.RequiredLength = 6;
@@ -37,8 +49,19 @@ namespace IdentityNetCore
 
                 options.Lockout.MaxFailedAccessAttempts = 5;
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+
+                options.SignIn.RequireConfirmedEmail = true;
             });
 
+            services.ConfigureApplicationCookie(option =>
+            {
+                option.LoginPath = $"/{nameof(IdentityController).CutOffController()}/{nameof(IdentityController.SignIn)}";
+                option.AccessDeniedPath =
+                    $"/{nameof(IdentityController).CutOffController()}/{nameof(IdentityController.AccessDenied)}";
+            });
+
+            services.Configure<SmtpOptions>(Configuration.GetSection("Smtp"));
+            services.AddSingleton<IEmailSender, SmtpEmailSender>();
             services.AddControllersWithViews();
         }
 
