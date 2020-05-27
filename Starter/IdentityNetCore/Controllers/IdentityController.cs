@@ -154,5 +154,11 @@ namespace IdentityNetCore.Controllers
         {
             return View();
         }
+
+        public async Task<IActionResult> SignOut()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction(nameof(SignIn));
+        }
     }
 }

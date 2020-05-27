@@ -1,0 +1,20 @@
+﻿@{
+    var loggedIn = User.Identity.IsAuthenticated;
+}
+
+@if (loggedIn)
+{
+    <li class="nav-item">
+        <a class="nav-link text-dark" asp-area="" asp-controller="Identity" asp-action="SignOut">Sign Out</a>
+        <label>Hello @User.Identity.Name</label>
+    </li>
+}
+else
+{
+    <li class="nav-item">
+        <a class="nav-link text-dark" asp-area="" asp-controller="Identity" asp-action="SignUp">Sign Up</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link text-dark" asp-area="" asp-controller="Identity" asp-action="SignIn">Sign In</a>
+    </li>
+}
