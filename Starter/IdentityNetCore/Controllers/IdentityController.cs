@@ -238,7 +238,20 @@ namespace IdentityNetCore.Controllers
 
         public async Task<IActionResult> ExternalLoginCallback()
         {
-            return View();
+            var info = await _signInManager.GetExternalLoginInfoAsync();
+            var emailClaim = info.Principal.Claims.Single(_ => _.Type == ClaimTypes.Email);
+            var user = await _userManager.FindByEmailAsync(emailClaim.Value);
+            if (user == null)
+            {
+                user = new IdentityUser { 
+                    Email = emailClaim.Value, 
+                    UserName = emailClaim.Value
+                };
+                await _userManager.CreateAsync(user);
+                await _userManager.AddLoginAsync(user, info);
+            }
+            await _signInManager.SignInAsync(user, false);
+            return RedirectToAction(nameof(HomeController.Index), nameof(HomeController).CutOffController());
         }
 
         public IActionResult AccessDenied()
