@@ -26,7 +26,7 @@ namespace IdentityNetCore.Controllers
             return View();
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Policy = "AdminDep")]
         public IActionResult Admin()
         {
             return View();

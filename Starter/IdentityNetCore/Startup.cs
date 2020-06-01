@@ -64,6 +64,13 @@ namespace IdentityNetCore
 
             services.Configure<SmtpOptions>(Configuration.GetSection("Smtp"));
             services.AddSingleton<IEmailSender, SmtpEmailSender>();
+            services.AddAuthorization(option =>
+            {
+                option.AddPolicy("AdminDep", p =>
+                {
+                    p.RequireClaim("Department", "Administrative").RequireRole("Admin");
+                });
+            });
             services.AddControllersWithViews();
         }
 
