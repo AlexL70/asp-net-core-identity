@@ -1,5 +1,6 @@
 using System;
 using System.Reflection;
+using System.Text;
 using IdentityNetCore.Controllers;
 using IdentityNetCore.Data;
 using IdentityNetCore.Helpers;
@@ -11,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 
 namespace IdentityNetCore
 {
@@ -64,11 +66,28 @@ namespace IdentityNetCore
                 option.SlidingExpiration = true;
             });
 
-            services.AddAuthentication().AddFacebook(options =>
-            {
-                options.AppId = Configuration["FacebookAppId"];
-                options.AppSecret = Configuration["FacebookAppSecret"];
-            });
+            //  Setup Jwt tokens
+            const string section = "ApiSecurity";
+            var issuer = Configuration[$"{section}:TokenIssuer"];
+            var audience = Configuration[$"{section}:TokenAudience"];
+            var keyBytes = Encoding.UTF8.GetBytes( Configuration[$"{section}:TokenKey"]);
+            services.AddAuthentication()
+                .AddFacebook(options =>
+                {
+                    options.AppId = Configuration["FacebookAppId"];
+                    options.AppSecret = Configuration["FacebookAppSecret"];
+                })
+                .AddJwtBearer(options =>
+                {
+                    options.RequireHttpsMetadata = false;
+                    options.SaveToken = true;
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidIssuer = issuer,
+                        ValidAudience = audience,
+                        IssuerSigningKey = new SymmetricSecurityKey(keyBytes)
+                    };
+                });
 
             services.Configure<SmtpOptions>(Configuration.GetSection("Smtp"));
             services.AddSingleton<IEmailSender, SmtpEmailSender>();
