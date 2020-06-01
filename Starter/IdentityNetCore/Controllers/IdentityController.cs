@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using IdentityNetCore.Helpers;
 using IdentityNetCore.Models;
 using IdentityNetCore.Service;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Internal;
@@ -92,6 +93,42 @@ namespace IdentityNetCore.Controllers
                 }
 
                 ModelState.AddModelError(nameof(SignUp), "User with this email already exists.");
+            }
+
+            return View(model);
+        }
+
+        [Authorize]
+        public async Task<IActionResult> MfaSetup()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            await _userManager.ResetAuthenticatorKeyAsync(user);
+            var model = new MfaViewModel
+            {
+                Token = await _userManager.GetAuthenticatorKeyAsync(user)
+            };
+
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> MfaSetup(MfaViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await _userManager.GetUserAsync(User);
+                var succeeded = await _userManager.VerifyTwoFactorTokenAsync(user,
+                    _userManager.Options.Tokens.AuthenticatorTokenProvider, model.Code);
+                if (succeeded)
+                {
+                    var result = _userManager.SetTwoFactorEnabledAsync(user, true);
+                }
+                else
+                {
+                    ModelState.AddModelError("Verify", "Sorry, your MFA code cannot be validated.");
+                }
             }
 
             return View(model);

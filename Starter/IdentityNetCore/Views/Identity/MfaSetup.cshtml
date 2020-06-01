@@ -1,0 +1,14 @@
+﻿@model MfaViewModel
+
+<p>
+    Please add the code below into your auth app
+</p>
+<p>@Model.Token</p>
+
+<form asp-controller="Identity" asp-action="MfaSetup" method="post">
+    <input type="hidden" asp-for="Token" />
+    <div class="form-group">
+        Enter code: <input type="text" class="form-control" asp-for="Code"/>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
