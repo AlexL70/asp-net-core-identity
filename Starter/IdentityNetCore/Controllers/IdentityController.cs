@@ -180,6 +180,12 @@ namespace IdentityNetCore.Controllers
             }
 
             var result = await _signInManager.PasswordSignInAsync(model.Username, model.Password, model.RememberMe, false);
+
+            if (result.RequiresTwoFactor)
+            {
+                return RedirectToAction(nameof(MFACheck));
+            }
+
             if (!result.Succeeded)
             {
                 ModelState.AddModelError("Login", "Sign in is not successful.");
@@ -198,6 +204,27 @@ namespace IdentityNetCore.Controllers
             }
 
             return RedirectToAction(nameof(HomeController.Index), nameof(HomeController).CutOffController());
+        }
+
+        public IActionResult MFACheck()
+        {
+            return View(new MFACheckViewModel());
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> MFACheck(MFACheckViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var result = await _signInManager.TwoFactorAuthenticatorSignInAsync(model.Code, false, false);
+
+                if (result.Succeeded)
+                {
+                    return RedirectToAction(nameof(HomeController.Index), nameof(HomeController).CutOffController());
+                }
+            }
+
+            return View(model);
         }
 
         public async Task<IActionResult> AccessDenied()
