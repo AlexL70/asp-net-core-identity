@@ -5,10 +5,23 @@
 </p>
 <p>@Model.Token</p>
 
+<p>Alternatively scan the QR Code with your mobile phone.</p>
+
+<div id="qrCode"></div>
+
 <form asp-controller="Identity" asp-action="MfaSetup" method="post">
     <input type="hidden" asp-for="Token" />
+    <input type="hidden" asp-for="QrCodeUrl" />
     <div class="form-group">
         Enter code: <input type="text" class="form-control" asp-for="Code"/>
     </div>
     <button type="submit" class="btn btn-primary">Submit</button>
 </form>
+
+@section Scripts
+{
+    <script src="~/js/qrcode.min.js" asp-append-version="true"></script>
+    <script type="text/javascript">
+        new QRCode(document.getElementById("qrCode"), "@Model.QrCodeUrl");
+    </script>
+}

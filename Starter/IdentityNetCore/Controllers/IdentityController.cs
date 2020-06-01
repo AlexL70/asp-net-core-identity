@@ -101,11 +101,15 @@ namespace IdentityNetCore.Controllers
         [Authorize]
         public async Task<IActionResult> MfaSetup()
         {
+            const string Provider = "Asp.Net_Identity";
+
             var user = await _userManager.GetUserAsync(User);
             await _userManager.ResetAuthenticatorKeyAsync(user);
+            var token = await _userManager.GetAuthenticatorKeyAsync(user);
             var model = new MfaViewModel
             {
-                Token = await _userManager.GetAuthenticatorKeyAsync(user)
+                Token = token,
+                QrCodeUrl = $"otpauth://totp/{Provider}:{user.Email}?secret={token}&issuer={Provider}&digits=6"
             };
 
 
