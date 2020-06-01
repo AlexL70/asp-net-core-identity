@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using IdentityNetCore.Controllers;
 using IdentityNetCore.Data;
 using IdentityNetCore.Helpers;
@@ -23,6 +24,7 @@ namespace IdentityNetCore
                 .SetBasePath(env.ContentRootPath)
                 .AddJsonFile("appsettings.json", true, true)
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", true)
+                .AddUserSecrets(Assembly.GetExecutingAssembly())
                 .AddEnvironmentVariables()
                 .Build();
         }
@@ -60,6 +62,12 @@ namespace IdentityNetCore
                     $"/{nameof(IdentityController).CutOffController()}/{nameof(IdentityController.AccessDenied)}";
                 option.ExpireTimeSpan = TimeSpan.FromHours(1);
                 option.SlidingExpiration = true;
+            });
+
+            services.AddAuthentication().AddFacebook(options =>
+            {
+                options.AppId = Configuration["FacebookAppId"];
+                options.AppSecret = Configuration["FacebookAppSecret"];
             });
 
             services.Configure<SmtpOptions>(Configuration.GetSection("Smtp"));

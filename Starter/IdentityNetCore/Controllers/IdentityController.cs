@@ -29,7 +29,7 @@ namespace IdentityNetCore.Controllers
             _emailSender = emailSender;
         }
 
-        public async Task<IActionResult> SignUp()
+        public IActionResult SignUp()
         {
             var model = new SignUpViewModel() { Role = "Member" };
             return View(model);
@@ -227,7 +227,21 @@ namespace IdentityNetCore.Controllers
             return View(model);
         }
 
-        public async Task<IActionResult> AccessDenied()
+        [HttpPost]
+        public IActionResult ExternalLogin(string provider, string returnUrl = null)
+        {
+            var props = _signInManager.ConfigureExternalAuthenticationProperties(provider, returnUrl);
+            var callBackUrl = Url.Action(nameof(ExternalLoginCallback));
+            props.RedirectUri = callBackUrl;
+            return Challenge(props, provider);
+        }
+
+        public async Task<IActionResult> ExternalLoginCallback()
+        {
+            return View();
+        }
+
+        public IActionResult AccessDenied()
         {
             return View();
         }
