@@ -3,7 +3,8 @@
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @{
-    var roles = new List<string>() { "Member", "Admin" };
+    var roles = new List<string> { "Member", "Admin" };
+    var departments = new List<string> { "IT", "Administrative", "Accounting" };
 }
 
 <h1>SignUp</h1>
@@ -13,17 +14,22 @@
 
     <div class="form-group col-4">
         <label asp-for="Email">Email:</label>
-        <input type="text" asp-for="Email" class="form-control"/>
+        <input type="text" asp-for="Email" class="form-control" />
     </div>
 
     <div class="form-group col-4">
         <label asp-for="Password">Password:</label>
-        <input type="password" asp-for="Password" class="form-control"/>
+        <input type="password" asp-for="Password" class="form-control" />
     </div>
-    
+
+    <div class="form-group col-4">
+        <label asp-for="Department"></label>
+        @Html.DropDownListFor(_ => _.Department, departments.Select(_ => new SelectListItem { Text = _, Value = _ }))
+    </div>
+
     <div class="form-group col-4">
         <label asp-for="Role"></label>
-        @Html.DropDownListFor(_ => _.Role, roles.Select(_ => new SelectListItem {Text = _, Value = _}))
+        @Html.DropDownListFor(_ => _.Role, roles.Select(_ => new SelectListItem { Text = _, Value = _ }))
     </div>
 
     <button class="btn btn-primary" type="submit">Sign up</button>

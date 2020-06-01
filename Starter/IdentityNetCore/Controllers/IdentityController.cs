@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using IdentityNetCore.Helpers;
 using IdentityNetCore.Models;
@@ -74,6 +75,14 @@ namespace IdentityNetCore.Controllers
                         {
                             ModelState.AddModelError($"Role", $"Cannot assign role {model.Role} to user {model.Email}");
                             return View(model);
+                        }
+
+                        var claim = new Claim("Department", model.Department);
+                        var addClaimResult = await _userManager.AddClaimAsync(user, claim);
+
+                        if (!addClaimResult.Succeeded)
+                        {
+                            ModelState.AddModelError("Claim", $"Cannot add department {model.Department}");
                         }
 
                         return RedirectToAction(nameof(SignIn));
