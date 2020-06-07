@@ -1,0 +1,14 @@
+﻿@model StudentViewModel
+@using StudentEnroll.Controllers
+
+<div class="container">
+        <div class="row">
+            <div class="col-md-10">
+                <form asp-action="SignUp" asp-controller="Students" method="post">
+                    <label asp-for="FullName">Enter your full name</label>
+                    <input type="text" asp-for="FullName" id="FullName"/>
+                    <input type="submit" value="Submit" />
+                </form>
+            </div>
+        </div>
+    </div>

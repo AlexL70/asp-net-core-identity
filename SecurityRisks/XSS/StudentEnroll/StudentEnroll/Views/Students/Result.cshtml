@@ -1,0 +1,7 @@
+﻿@model StudentViewModel
+
+@*  Never do it with user input in your real applications 
+    This way you allow Cross-Site Scripting (XSS) attack!
+    Do it only with content you 100% sure about.
+    *@
+<h2>@Html.Raw(@Model.FullName)</h2>
